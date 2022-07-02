@@ -44,15 +44,6 @@ jobs:
       with:
         terraform_version: "${{ env.TF_VERSION }}"
 
-    - uses: dawidd6/action-download-artifact@v2
-      with:
-        github_token: ${{secrets.GITHUB_TOKEN}}
-        workflow: plan.yml
-        workflow_conclusion: success
-        pr: ${{github.event.pull_request.number}}
-        commit: ${{github.event.pull_request.head.sha}}
-        name: terraform-plan-${{ github.event.issue.number }}
-
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -70,7 +61,7 @@ jobs:
 
     - name: Update Pull Request
       uses: actions/github-script@v6
-      if: ${{ !env.ACT }} && github.event_name == 'pull_request'
+      if: ${{ !env.ACT  && github.event_name == 'pull_request' }}
       env:
         APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
       with:
