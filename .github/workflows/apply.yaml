@@ -44,3 +44,31 @@ jobs:
     - name: Run Apply
       id: apply
       run: terraform apply -auto-approve -input=false -var-file "./envs/${{ env.ENVIRONMENT }}.tfvars"
+
+    - name: Update Pull Request
+      uses: actions/github-script@v6
+      if: ${{ !env.ACT }} && github.event_name == 'pull_request'
+      env:
+        APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+          #### Terraform Apply 📖\`${{ steps.plan.outcome }}\`
+
+          <details><summary>Show Apply</summary>
+
+          \`\`\`\n
+          ${process.env.APPLY}
+          \`\`\`
+
+          </details>
+
+          *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })
