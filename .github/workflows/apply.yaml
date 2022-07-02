@@ -1,0 +1,51 @@
+name: Terraform Apply
+on:
+  issue_comment:
+    types: [created]
+
+  workflow_dispatch:
+    inputs:
+      environments:
+        required: false
+        description: 'list of environment'
+        default: '["prod", "staging", "dev"]'
+
+env:
+  ENVIRONMENT: ${{ contains(inputs.environments, github.ref_name) && github.ref_name || 'dev' }}
+  TF_VERSION: "1.0.5"
+  TF_PLAN_OUT: "plan-${{ github.event.number }}.tfplan"
+
+jobs:
+  terraform-apply:
+    name: terraform apply
+    runs-on: ubuntu-latest
+    # github.event.issue.pull_request && github.event.comment.body == 'terraform apply' &&
+    # github.event.review.state == 'approved'
+    if: github.event.issue.pull_request && github.event.comment.body == 'terraform apply'
+    steps:   
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: "${{ env.TF_VERSION }}"
+
+    - uses: actions/download-artifact@master
+      with:
+        name: terraform-plan-${{ github.event.number }}
+        path: ${{ env.TF_PLAN_OUT }}
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: "us-east-1"
+
+    - name: Terraform Init
+      id: init
+      run: terraform init -backend-config="key=${{ env.ENVIRONMENT }}.tfstate" -var-file "./envs/${{ env.ENVIRONMENT }}.tfvars"
+
+    - name: Run Apply
+      run: terraform apply -auto-approve -input=false ${{ env.TF_PLAN_OUT }}
