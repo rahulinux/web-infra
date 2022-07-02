@@ -57,7 +57,7 @@ jobs:
 
     - name: Run Apply
       id: apply
-      run: terraform apply -auto-approve -input=false -var-file "./envs/${{ env.ENVIRONMENT }}.tfvars"
+      run: terraform apply -no-color -auto-approve -input=false -var-file "./envs/${{ env.ENVIRONMENT }}.tfvars"
 
     - name: Update Pull Request
       uses: actions/github-script@v6
@@ -68,7 +68,7 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-          #### Terraform Apply 📖\`${{ steps.plan.outcome }}\`
+          #### Terraform Apply 📖\`${{ steps.apply.outcome }}\`
 
           <details><summary>Show Apply</summary>
 
