@@ -11,7 +11,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.14.1"
 
-  name = "my-vpc"
+  name = "vpc-${var.environment}"
   cidr = "10.0.0.0/16"
 
   azs             = local.azs
@@ -24,7 +24,7 @@ module "vpc" {
   tags = local.tags
 
   vpc_tags = {
-    Name = "my-vpc"
+    Name = "vpc-${var.environment}"
   }
 }
 
@@ -75,7 +75,7 @@ resource "aws_instance" "web" {
 }
 
 resource "aws_security_group" "web_infra" {
-  name        = "web_infra"
+  name        = "web-infra-${var.environment}"
   description = "Allow inbound traffic on web-infra"
   vpc_id      = module.vpc.vpc_id
 
