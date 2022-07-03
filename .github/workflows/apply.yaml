@@ -61,7 +61,7 @@ jobs:
 
     - name: Update Pull Request
       uses: actions/github-script@v6
-      if: ${{ !env.ACT }} && github.event_name == 'pull_request'
+      if: ${{ !env.ACT  && github.event_name == 'pull_request' }}
       env:
         APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
       with:
