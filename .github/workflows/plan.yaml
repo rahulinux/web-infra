@@ -35,12 +35,6 @@ jobs:
         else
           echo "ENVIRONMENT=dev" >> $GITHUB_ENV
         fi
-        echo "INFO:: CI_DESTROY=${{ env.CI_DESTROY }}"
-        echo "INFO:: ENVIRONMENTS=${{ inputs.environments }}"
-        echo "INFO:: ENVIRONMENT=$ENVIRONMENT"
-        echo "INFO:: EVENT_BASE_REF=${{ github.event.pull_request.base.ref }}"
-        echo "INFO:: GITHUB_BASE_REF=${{ env.GITHUB_BASE_REF }}"
-        echo "INFO:: GITHUB_REF_NAME=${{ env.GITHUB_REF_NAME }}"
 
     - uses: hashicorp/setup-terraform@v2
       with:
